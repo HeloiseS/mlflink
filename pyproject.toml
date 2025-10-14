@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]                                                                                  
+build-backend = "setuptools.build_meta"   
+
+[project]
+name = "mlflink"
+version = "0.1.0"
+description = "Create Virtual Research Assistants for Fink using MlFlow "
+authors = [
+    { name = "H. F. Stevance", email = "hfstevance@gmail.com" }
+]
+readme = "README.md"
+#license = { text = "MIT" }
+dependencies = [
+    "pandas>=1.5",
+    "numpy>=1.23",
+    "scikit-learn>=1.2",
+    "matplotlib",
+    "plotly",
+    "tqdm",
+    "fink_client",
+    "lasair",
+    "dustmaps",
+    "mlflow",
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ipython",
+    "jupyter"
+]
+
+docs = ["sphinx==7.4.7", "sphinx_rtd_theme==3.0.2"]    
+
+[tool.setuptools.packages.find]
+where = ["finkvra"]
+
+[tool.setuptools.package-data]
+"finkvra.data" = ["*.csv", "*.npz"]
+
+[tool.ruff]                                                                     
+line-length = 100                                                               
+target-version = "py39"                                                         
+exclude = ["build", "dist", ".venv"]
+
+[tool.coverage.run]
+#omit = [
+#    "finkvra/utils/labels.py",  
+#]
