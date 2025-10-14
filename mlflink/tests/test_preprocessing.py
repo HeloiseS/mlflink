@@ -12,7 +12,7 @@ import pandas as pd
 # WORKS FOR ALL OSes
 PARQUET_FILE = resources.files("mlflink") / "data" / "test_alerts.parquet"
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def alerts_df():
     df = pd.read_parquet(PARQUET_FILE)
     return df
@@ -42,7 +42,7 @@ class DummyLasairClient:
             raise RuntimeError("No more dummy responses left")
         return self._responses.pop(0) # returns this first element of the list, then the second etc..
     
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def clean_df(alerts_df):
     return pp.raw2clean(alerts_df)
 

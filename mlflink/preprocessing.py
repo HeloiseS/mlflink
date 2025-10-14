@@ -9,7 +9,6 @@ To help readability, additional comments and sectioning is used.
 import pandas as pd
 import logging
 import numpy as np
-from astropy.coordinates import SkyCoord
 import os
 from fink_client.visualisation import extract_field
 import lasair
