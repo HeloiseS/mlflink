@@ -101,3 +101,76 @@ def test_run_sherlock_with_mocked_client(monkeypatch, clean_df):
     assert out.shape[0] == 1
     assert out.iloc[0]['sherl_class'] == "SN"
     assert pytest.approx(out.iloc[0]['sep_arcsec']) == "1.23"
+
+# ################################
+# MAKE X  
+# ################################
+
+    
+@pytest.fixture(scope="function")
+def mocked_curated_df(clean_df, monkeypatch):
+    # similar to above, but now we want to test the feature engineering
+    # so we need a few more varied classes and some more rows
+    monkeypatch.setenv('LASAIR_TOKEN', 'fake-token')
+
+    # MOCKED SHERLOCK RESPONSES
+    # 1. With a crossmatch and a separation:
+    resp_with_cross_match = {
+        "classifications": {"transient_00000": ["SN"]},
+        "crossmatches": [{"separationArcsec": 1.23}]
+    }
+
+    # 2. No crossmatch to hit the IndexError and get a np.nan
+    resp_no_match = {
+        "classifications": {"transient_00000": ["VS"]},
+        "crossmatches": []
+    }
+
+    # 3. Cross-match with an AGN
+    resp_agn = {
+        "classifications": {"transient_00000": ["AGN"]},
+        "crossmatches": [{"separationArcsec": 0.45}]
+    }
+
+    dummy = DummyLasairClient([
+        resp_with_cross_match,
+        resp_no_match,
+        resp_agn,
+    ])   
+
+    monkeypatch.setattr(pp.lasair, "lasair_client", 
+                        lambda token, 
+                        endpoint: dummy # the thing we made above
+                        )
+    return pp.run_sherlock(clean_df.iloc[:3].copy()) 
+
+def test_make_X(mocked_curated_df):
+    X, meta = pp.make_X(mocked_curated_df)
+    assert not X.empty
+    assert not meta.empty
+    assert X.shape[0] == meta.shape[0]
+    # TODO: make this automatically form sherlock columns, fink columns and vra columns
+    expected_feature_cols = ['ra', 
+                             'dec', 
+                             'drb', 
+                             'ndets', 
+                             'nnondets', 
+                             'dets_median', 
+                             'dets_std',
+                             'sep_arcsec', 
+                             'amplitude', 
+                             'linear_fit_reduced_chi2',
+                             'linear_fit_slope', 
+                             'linear_fit_slope_sigma', 
+                             'median',
+                             'median_absolute_deviation', 
+                             'amplituder_', 
+                             'linear_fit_reduced_chi2r_',
+                             'linear_fit_sloper_', 
+                             'linear_fit_slope_sigmar_', 
+                             'medianr_',
+                             'median_absolute_deviationr_'
+                             ]
+    assert all(col in X.columns for col in expected_feature_cols), "Missing expected feature columns in X DataFrame"
+    expected_meta_cols = ['objectId']
+    assert all(col in meta.columns for col in expected_meta_cols), "Missing expected metadata columns in meta DataFrame"
