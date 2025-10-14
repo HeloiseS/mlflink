@@ -36,10 +36,10 @@ dev = [
 docs = ["sphinx==7.4.7", "sphinx_rtd_theme==3.0.2"]    
 
 [tool.setuptools.packages.find]
-where = ["finkvra"]
+where = ["mlflink"]
 
 [tool.setuptools.package-data]
-"finkvra.data" = ["*.csv", "*.npz"]
+"mlflink.data" = ["*.csv", "*.npz", "*.parquet"]
 
 [tool.ruff]                                                                     
 line-length = 100                                                               
