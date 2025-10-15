@@ -3,14 +3,11 @@ from mlflink import preprocessing as pp
 from importlib import resources
 import pandas as pd 
 
-# ################################
-# RAW 2 CLEAN 
-# ################################
-
 # the files we get from resources are "Traversable" so we can concatenante paths like this
 # using an / operator and it will do something like `joinpath` in the background
 # WORKS FOR ALL OSes
-#PARQUET_FILE = resources.files("mlflink") / "data" / "test_alerts.parquet"
+# PARQUET_FILE = resources.files("mlflink") / "data" / "test_alerts.parquet" 
+# the above  didn't work for python 3.9 CI
 
 with resources.path("mlflink.data", "test_alerts.parquet") as parquet_path:
     PARQUET_FILE = parquet_path
@@ -19,6 +16,25 @@ with resources.path("mlflink.data", "test_alerts.parquet") as parquet_path:
 def alerts_df():
     df = pd.read_parquet(PARQUET_FILE)
     return df
+
+
+# ################################
+# MAKE CUT
+# ################################
+def test_make_cut(alerts_df):
+    cut_df = pp.make_cut(alerts_df)
+    assert not cut_df.empty
+    # Check that the cuts have been applied correctly
+    assert (cut_df["cdsxmatch"] == "Unknown").all()
+    assert (cut_df["roid"] != 3).all()
+    assert (cut_df["candidate"].apply(lambda x: x["magpsf"]) > 19.5).all()
+    assert (cut_df["candidate"].apply(lambda x: x["drb"]) > 0.5).all()
+    
+# ################################
+# RAW 2 CLEAN 
+# ################################
+
+
 
 def test_raw2clean(alerts_df):
     clean_df = pp.raw2clean(alerts_df)

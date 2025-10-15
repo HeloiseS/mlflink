@@ -20,7 +20,14 @@ logging.basicConfig(level=logging.INFO,
 # #################################
 # Make cuts on Alert df
 # #################################
-# TODO include a make_cut() function to reporduce the cuts that the topic does
+def make_cut(alerts_df: pd.DataFrame):
+    """User-defined cuts on alerts - THESE ARE MINE ADD YOUR OWN"""
+    # Include new taxonomy
+    f1 = alerts_df["cdsxmatch"] == "Unknown"
+    f2 = alerts_df["roid"] != 3
+    f3 = alerts_df["candidate"].apply(lambda x: x["magpsf"]) > 19.5
+    f4 = alerts_df["candidate"].apply(lambda x: x["drb"]) > 0.5
+    return alerts_df[f1 & f2 & f3 & f4]
 
 # #################################
 # Alert df to Clean data 
