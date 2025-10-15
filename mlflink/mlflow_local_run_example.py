@@ -12,7 +12,7 @@ mlflow server --host 127.0.0.1 --port 6969
 import mlflow
 from mlflow.tracking import MlflowClient
 import pandas as pd
-from mlflink.preprocessing import preprocessing as pp
+from mlflink.processing import preprocessing as pp
 from importlib import resources
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
