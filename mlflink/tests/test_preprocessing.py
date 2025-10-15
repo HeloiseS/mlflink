@@ -10,7 +10,10 @@ import pandas as pd
 # the files we get from resources are "Traversable" so we can concatenante paths like this
 # using an / operator and it will do something like `joinpath` in the background
 # WORKS FOR ALL OSes
-PARQUET_FILE = resources.files("mlflink") / "data" / "test_alerts.parquet"
+#PARQUET_FILE = resources.files("mlflink") / "data" / "test_alerts.parquet"
+
+with resources.path("mlflink.data", "test_alerts.parquet") as parquet_path:
+    PARQUET_FILE = parquet_path
 
 @pytest.fixture(scope="function")
 def alerts_df():
