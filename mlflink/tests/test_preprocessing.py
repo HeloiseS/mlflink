@@ -1,5 +1,5 @@
 import pytest
-from mlflink import preprocessing as pp
+from mlflink.preprocessing import preprocessing as pp
 from importlib import resources
 import pandas as pd 
 
