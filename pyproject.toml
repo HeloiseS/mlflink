@@ -39,7 +39,8 @@ docs = ["sphinx==7.4.7", "sphinx_rtd_theme==3.0.2"]
 where = ["mlflink"]
 
 [tool.setuptools.package-data]
-"mlflink.data" = ["*.csv", "*.npz", "*.parquet"]
+mlflink = ["data/*"]
+
 
 [tool.ruff]                                                                     
 line-length = 100                                                               
