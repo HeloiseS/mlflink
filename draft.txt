@@ -1,0 +1,83 @@
+## 9. Advanced: Automating the Process
+
+You can create a helper function to streamline this workflow:
+
+
+
+def send_local_run_to_remote(
+    local_run_id,
+    local_experiment_name,
+    remote_uri,
+    local_artifacts_dir,
+    include_data=True
+):
+    """
+    Helper function to send a local MLflow run to a remote server.
+    
+    Parameters:
+    -----------
+    local_run_id : str
+        ID of the local run to replicate
+    local_experiment_name : str
+        Name of the local experiment
+    remote_uri : str
+        Remote MLflow tracking URI
+    local_artifacts_dir : Path
+        Path to local mlartifacts directory
+    include_data : bool
+        Whether to log training data (default: True)
+    """
+    import mlflow
+    from mlflow.tracking import MlflowClient
+    
+    # Connect to local server to retrieve info
+    local_client = MlflowClient()
+    local_run = local_client.get_run(local_run_id)
+    
+    # Get experiment ID
+    local_exp = local_client.get_experiment_by_name(local_experiment_name)
+    exp_id = local_exp.experiment_id
+    
+    # Build artifact paths
+    artifacts_path = Path(local_artifacts_dir) / exp_id / local_run_id / "artifacts"
+    
+    # Load data
+    X = pd.read_parquet(artifacts_path / "X_train.parquet")
+    y = pd.read_parquet(artifacts_path / "y_train.parquet")
+    
+    # Load parameters
+    params = local_run.data.params
+    
+    # Switch to remote
+    mlflow.set_tracking_uri(remote_uri)
+    mlflow.set_experiment(local_experiment_name)
+    
+    # Re-run on remote
+    with mlflow.start_run(run_name=f"from_local_{local_run_id[:8]}"):
+        # Train model
+        model = HistGradientBoostingClassifier(**params)
+        model.fit(X.values, y)
+        y_pred = model.predict(X.values)
+        
+        # Log everything
+        mlflow.log_params(params)
+        mlflow.sklearn.log_model(model, "model", signature=infer_signature(X, y_pred))
+        
+        # Log metrics
+        for metric_name, metric_value in local_run.data.metrics.items():
+            mlflow.log_metric(metric_name, metric_value)
+        
+        # Optionally log data
+        if include_data:
+            mlflow.log_table(X, "X_train.parquet")
+            mlflow.log_table(y, "y_train.parquet")
+        
+        print(f"✅ Successfully sent run {local_run_id[:8]} to remote server!")
+
+# Example usage:
+# send_local_run_to_remote(
+#     local_run_id="abc123...",
+#     local_experiment_name="tutorial",
+#     remote_uri="https://mlflow-dev.fink-broker.org",
+#     local_artifacts_dir=Path.cwd() / "mlartifacts"
+# )
