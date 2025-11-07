@@ -17,7 +17,7 @@ def alerts_df():
     df = pd.read_parquet(PARQUET_FILE)
     return df
 
-
+s
 # ################################
 # MAKE CUT
 # ################################
